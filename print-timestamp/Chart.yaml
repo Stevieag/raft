@@ -1,0 +1,5 @@
+apiVersion: v2
+name: print-timestamp
+version: 0.0.1
+appVersion: 0.0.1
+description: print-timestamp

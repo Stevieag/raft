@@ -1,0 +1,9 @@
+name: print-timestamp
+image:
+  repository: print-timestamp
+  tag: alpine
+service:
+  port: 4430
+hpa:
+  max: 50
+  avUtil: 25

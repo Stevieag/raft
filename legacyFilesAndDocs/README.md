@@ -1,51 +1,29 @@
 # raft
+
+original doc in repo
+**TLDR**
+    
+    install minikube
+    install docker
+    clone repo
+    cd into repo
+    run docker build -t print-timestamp:alpine .
+    minikube start
+    minikube image load print-timestamp:alpine
+    kb apply -f k8s/deployment.yaml
+    kb apply -f k8s/service.yaml
+    kb apply -f k8s/scaler.yaml
+    kb get pods
+    kb port-forward pod/print-timestamp-<from-prev-command-1234567890> 4430:4430
+    curl 127.0.0.1:4430
+
+    time output
+
+VVV IN PROGRESS VVV
+
 <p>
 <strong><span style="text-decoration:underline;">TECH CHALLENGE</span></strong>
 </p>
-
-**TLDR**
-    
-    - install minikube
-    - install docker
-    - install helm
-    - install act
-    - clone repo
-    - cd into repo
-    - run docker build -t print-timestamp:alpine .
-    - minikube start
-    - minikube image load print-timestamp:alpine
-    - minikube addons enable metrics-server
-    - helm repo add prometheus-community https://prometheus-community.github.io/ helm-charts
-    - helm upgrade --install prometheus prometheus-community/prometheus
-    - kubectl expose service prometheus-server --type=NodePort --target-port=9090 --name=prometheus-server-np
-    - minikube service prometheus-server-np --url
-    - helm repo add grafana https://grafana.github.io/helm-charts
-    - helm upgrade --install grafana grafana/grafana
-    - kubectl expose service grafana --type=NodePort --target-port=3000 --name=grafana-np
-    ## get and record password - user is admin
-    - kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo 
-    - minikube service grafana-np --url
-    - helm upgrade --install timestamp print-timestamp
-    - kb get pods
-    - kb port-forward pod/print-timestamp-<from-prev-command-1234567890> 4430:4430
-    - curl 127.0.0.1:4430/timestamp
-    - time output in json
-
-
-⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇ MY PROGRESS ⬇⬇⬇⬇⬇⬇⬇⬇⬇
-
-    - Python created
-    - Docker image created
-    - Helm chart completed for print-timestamp server
-    - Print-timestamp using flask serves timestamp from K3s
-    - Grafana and Prometheus up and running
-    - Started ci-cd using git hub actions
-    - todo is at he end of readme
-
-
-⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇ MY PROCESS ⬇⬇⬇⬇⬇⬇⬇⬇⬇
-
-
 <p>
 I created a Repo and cloned this locally
 </p>
@@ -360,68 +338,22 @@ We create a scaling policy<br>
     k8s/service.yaml
 <br>
 </p>
-<h5>HELM<br></h5>
 <p>
-I create a folder for the helm chart and built out the files from the previous deployment, hpa and service yaml.
-I adapted to put in frequesntly used vars from the values file and created the Chart.yaml
+TBC……<br>TESTING, MONITOR and HELM<br>
 </p>
-<br>
-<h5>FLASK</br></5>
-<p>The pyphon server was replaced by a flask server</5>
-
-    from flask import Flask, jsonify
-    import time
-
-    app = Flask(__name__)
-    metrics = PrometheusMetrics(app) 
-
-    @app.route('/timestamp', methods=['GET'])
-    def get_timestamp():
-      ts = time.time()
-      return jsonify({'timestamp': ts})
-
-    if __name__ == '__main__':
-      app.run(host='0.0.0.0', port=4430)
-
 <p>
-The code checked
-
-    
-    > python3 print_timestamp.py
-    > curl 127.0.0.1:4439/timestamp
-
-The docker image was rebuilt, launched into minikube and again tested to ensure the output was still coming through.
+We are to test the hpa next using hey to ensure autoscaling
+works.<br><br>I deleted minikube to ensure we had a clean
+env<br><br>Ran <code>minikube addons enable metrics-server</code> to ensure we
+can pull metrics
 </p>
-
-<br>
-<h5>Prometheus and grafana<br></h5>
 <p>
-I was able to _after alot of searching_ spin up these us in the cluster.
-
-Using helm made this so easy to get started
-
-    helm repo add prometheus-community https://prometheus-community.github.io/ helm-charts
-    - helm upgrade --install prometheus prometheus-community/prometheus
-    - kubectl expose service prometheus-server --type=NodePort --target-port=9090 --name=prometheus-server-np
-    - minikube service prometheus-server-np --url
-    - helm repo add grafana https://grafana.github.io/helm-charts
-    - helm upgrade --install grafana grafana/grafana
-    - kubectl expose service grafana --type=NodePort --target-port=3000 --name=grafana-np
-    ## get and record password - user is admin
-    - kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo 
-    - minikube service grafana-np --url
-
-and i had the set up running.
+Ran <code>minikube image load print-timestamp:alpine </code> to ensure image is
+available<br><br>Ran <code>kb port-forward
+pod/print-timestamp-5b76b58757-8lzsq 4430:4430 </code>to port
+forward<br><br>Tested using curl again
 </p>
-<br>
-⬇⬇⬇⬇⬇⬇⬇⬇⬇⬇ TODO ⬇⬇⬇⬇⬇⬇⬇⬇⬇
 <p>
-
-    - I have tried to build github actions pipeline but as yet not working (mac is causing issues)
-    - I am struggling to get the CPU output from my pod for the metrics server to read and hpa to scale
-    - I am still to successfully pull the metrics to prometheus - i have the config in
-
 Running <code>hey -z 30s -c 100 http://127.0.0.1:4430</code> places load on the
 cluster and should force scaling
-
 </p>
